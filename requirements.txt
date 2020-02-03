@@ -1,0 +1,4 @@
+tqdm==4.40.0
+requests==2.22.0
+eyeD3==0.8.10
+Pillow==7.0.0
