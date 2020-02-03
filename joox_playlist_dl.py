@@ -9,7 +9,7 @@ from pprint import pprint
 import json
 import re
 import eyed3
-## pyinstaller --onefile --icon=logo.ico .\SKIT.py ##
+## pyinstaller --onefile --icon=logo.ico .\joox_playlist_dl.py ##
 
 
 
