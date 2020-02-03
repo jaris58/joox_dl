@@ -9,8 +9,6 @@ from pprint import pprint
 import json
 import re
 import eyed3
-from PIL import Image
-from io import BytesIO
 ## pyinstaller --onefile --icon=logo.ico .\SKIT.py ##
 
 
