@@ -43,7 +43,7 @@ def cleanText(textRaw):
 def getTrack(songId, albumName = None):
     
     with requests.Session() as s:
-        g = s.get("https://api.joox.com/web-fcgi-bin/web_wmauth?country=id&lang=id&wxopenid=joox%2540fajar-isnandio.com&password=4ed5936945eb8cf0f98ccdfaa961ec26&wmauth_type=0&authtype=2&time=1598864049294&_=1598864049295&callback=axiosJsonpCallback4")
+        g = s.get("https://api.joox.com/web-fcgi-bin/web_wmauth?country=id&lang=id&wxopenid=[user-email]&password=[user-password]&wmauth_type=0&authtype=2&time=1598864049294&_=1598864049295&callback=axiosJsonpCallback4")
         # print g.text
         urlTrack = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=" + songId
         # urlTrack = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=TtEH_iaoAGl1dh5KsV44pg=="
