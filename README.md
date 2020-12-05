@@ -1,6 +1,6 @@
-﻿# joox_dl
+﻿# Joox Downloader
 
-Joox Downloader for Python.
+joox_dl is Joox Downloader for Python.
 
 ## Usage
 
