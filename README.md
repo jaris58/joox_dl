@@ -2,7 +2,7 @@
 
 joox_dl is Joox Downloader for Python.
 
-## Usage
+## Usage:
 
 ```usage
 usage: joox_dl.py [-h] [-p PLAYLIST] [-a ALBUM] [-s SONG] [-ar ARTIST] [-hq]
@@ -22,4 +22,5 @@ usage: joox_dl.py [-h] [-p PLAYLIST] [-a ALBUM] [-s SONG] [-ar ARTIST] [-hq]
   -hq, --highquality    High quality
   -m4a, --m4a           M4A Type
 ```
+#### Contributor:
 [![alt fajar-isnandio.com](https://fajar-isnandio.com/wp-content/uploads/2015/02/fajar-isnandio-com.png)](https://fajar-isnandio.com)
