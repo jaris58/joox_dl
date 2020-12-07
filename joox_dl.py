@@ -5,11 +5,16 @@ import requests
 from tqdm import tqdm
 import json
 import music_tag
+import configparser
 
 ## pyinstaller --onefile --icon=logo.ico .\joox_dl.py ##
 m4a = None
 highQuality = None
 counter = 0
+
+configParser = configparser.RawConfigParser()
+configFilePath = r'joox_dl.cfg'
+configParser.read(configFilePath)
 
 # download funtion 
 def downloadUrl(url, output_path):
@@ -43,7 +48,7 @@ def cleanText(textRaw):
 def getTrack(songId, albumName = None):
     
     with requests.Session() as s:
-        g = s.get("https://api.joox.com/web-fcgi-bin/web_wmauth?country=id&lang=id&wxopenid=[user-email]&password=[user-password]&wmauth_type=0&authtype=2&time=1598864049294&_=1598864049295&callback=axiosJsonpCallback4")
+        login = s.get("https://api.joox.com/web-fcgi-bin/web_wmauth?country=id&lang=id&wxopenid=" + configParser.get('login', 'wxopenid') + "&password=" + configParser.get('login', 'password') + "&wmauth_type=0&authtype=2&time=1598864049294&_=1598864049295&callback=axiosJsonpCallback4")
         urlTrack = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=" + songId
 
         r = s.get(urlTrack)
@@ -52,6 +57,11 @@ def getTrack(songId, albumName = None):
         dataTrackRaw = dataTrackRaw[dataTrackRaw.find("(")+1:-1]
 
         dataTrack = json.loads(dataTrackRaw)
+
+        if(dataTrack['msg'] == "invaid cookie") :
+            print(dataTrack['msg'])
+            exit()
+
         dataTrack['msong'] = cleanText(dataTrack['msong'])
 
         urlAdditionalDataTrack = s.get("https://api-jooxtt.sanook.com/page/single?regionURI=id-id&country=id&lang=id&id=YEPkJhasS%2B3KfmC1kyEEag%3D%3D&device=desktop")
