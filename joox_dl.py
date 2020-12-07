@@ -82,10 +82,10 @@ def getTrack(songId, albumName = None):
 
         global counter
         counter += 1
-
-        fileName = str(counter).zfill(2) + '. ' + dataTrack['msong'] + '.' + fileType
+        fileName = dataTrack['msong'] + '.' + fileType
 
         if albumName:
+            fileName = str(counter).zfill(2) + '. ' + fileName
             folderPath = 'music/'+ albumName
             if not os.path.exists(folderPath):
                 os.makedirs(folderPath)
