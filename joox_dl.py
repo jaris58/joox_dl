@@ -42,6 +42,7 @@ def cleanText(textRaw):
     textClean = textClean.replace(':', '');
     textClean = textClean.replace('®', '');
     textClean = textClean.replace('ñ', 'n');
+    textClean = textClean.replace('Ã±', 'n');
     textClean = textClean.replace('/', '-');
 
     return textClean
