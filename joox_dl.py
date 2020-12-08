@@ -1,22 +1,30 @@
 import argparse
-import sys
+import configparser
+import json
 import os
+import sys
+
+import music_tag
 import requests
 from tqdm import tqdm
-import json
-import music_tag
-import configparser
 
 ## pyinstaller --onefile --icon=logo.ico .\joox_dl.py ##
 m4a = None
 highQuality = None
 counter = 0
 
-configParser = configparser.RawConfigParser()
-configFilePath = r'joox_dl.cfg'
-configParser.read(configFilePath)
+configName = 'joox_dl.cfg'
 
-# download funtion 
+if getattr(sys, 'freeze', False):
+    applicationPath = os.path.dirname(sys.executable)
+else:
+    applicationPath = os.path.dirname(__file__)
+
+configPath = os.path.join(applicationPath, configName)
+configParser = configparser.RawConfigParser()
+configParser.read(configPath)
+
+# download funtion
 def downloadUrl(url, output_path):
     # url = "http://www.ovh.net/files/10Mb.dat" #big file test
     # Streaming, so we can iterate over the response.
@@ -48,7 +56,7 @@ def cleanText(textRaw):
     return textClean
 
 def getTrack(songId, albumName = None):
-    
+
     with requests.Session() as s:
         login = s.get("https://api.joox.com/web-fcgi-bin/web_wmauth?country=id&lang=id&wxopenid=" + configParser.get('login', 'wxopenid') + "&password=" + configParser.get('login', 'password') + "&wmauth_type=0&authtype=2&time=1598864049294&_=1598864049295&callback=axiosJsonpCallback4")
         urlTrack = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=" + songId
@@ -61,8 +69,8 @@ def getTrack(songId, albumName = None):
         dataTrack = json.loads(dataTrackRaw)
 
         if(dataTrack['msg'] == "invaid cookie") :
-            print(dataTrack['msg'])
-            exit()
+            print("Invalid cookie.")
+            sys.exit()
 
         dataTrack['msong'] = cleanText(dataTrack['msong'])
 
@@ -76,7 +84,7 @@ def getTrack(songId, albumName = None):
             link_track = dataTrack['r320Url']
         else:
             link_track = dataTrack['mp3Url']
-        
+
         fileType = link_track.split('?')
         fileType = fileType[0].split('.')
         fileType = fileType[-1]
@@ -142,9 +150,9 @@ def main():
     if playlistEncode:
         uri = "https://api-jooxtt.sanook.com/openjoox/v1/playlist/" + playlistEncode + "/tracks?country=id&lang=id&index=0&num=50"
     elif albumEncode :
-        uri = "https://api-jooxtt.sanook.com/openjoox/v1/album/" + albumEncode + "/tracks?country=id&lang=id&index=0&num=50"        
+        uri = "https://api-jooxtt.sanook.com/openjoox/v1/album/" + albumEncode + "/tracks?country=id&lang=id&index=0&num=50"
     elif artistEncode :
-        uri = "https://api-jooxtt.sanook.com/page/artistDetail?id=" + artistEncode + "&lang=id&country=id"        
+        uri = "https://api-jooxtt.sanook.com/page/artistDetail?id=" + artistEncode + "&lang=id&country=id"
     elif songEncode :
         uri = "single"
     else:
@@ -155,10 +163,10 @@ def main():
         parser.exit()
 
     else:
-        if songEncode: 
+        if songEncode:
             # downloading track
             song = getTrack(songEncode)
-            print(song['msong'] + ' - Selesai!') 
+            print(song['msong'] + ' - Selesai!')
         elif artistEncode:
             r = requests.get(uri)
             data = r.json()
@@ -182,10 +190,10 @@ def main():
 
                 # break
             print(data['name'] + ' : ' + str(data['tracks']['list_count']) + ' lagu.' + ' - Selesai!')
-        
-if __name__ == '__main__': 
+
+if __name__ == '__main__':
     try:
-        main() 
+        main()
     except KeyboardInterrupt:
         try:
             sys.exit(0)

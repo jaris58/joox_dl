@@ -4,6 +4,13 @@
 *.iml
 *.ipr
 
+### Build ###
+__pycache__/
+build/
+*.spec
 
-music/
+### Virtual Environments ###
 venv/
+
+### App ###
+music/
