@@ -3,10 +3,18 @@
 joox_dl is Joox Downloader for Python.
 
 ## Usage:
-
-```usage
+### Python 3:
+```install
+pip install -r requirements.txt
+```
+```usage python
 usage: joox_dl.py [-h] [-p PLAYLIST] [-a ALBUM] [-s SONG] [-ar ARTIST] [-hq]
                   [-m4a]
+```
+### Windows (CMD):
+```usage windows
+usage: joox_dl.exe [-h] [-p PLAYLIST] [-a ALBUM] [-s SONG] [-ar ARTIST] [-hq]
+                   [-m4a]
 ```
 
 ## Optional Arguments:
