@@ -8,9 +8,9 @@ import music_tag
 import requests
 from tqdm import tqdm
 
-## pyinstaller --onefile --icon=logo.ico .\joox_dl.py ##
+# pyinstaller --onefile --icon=logo.ico .\joox_dl.py
 m4a = None
-highQuality = None
+high_quality = None
 counter = 0
 
 configName = 'joox_dl.cfg'
@@ -24,15 +24,16 @@ configPath = os.path.join(applicationPath, configName)
 configParser = configparser.RawConfigParser()
 configParser.read(configPath)
 
+
 # download funtion
-def downloadUrl(url, output_path):
+def download_url(url, output_path):
     # url = "http://www.ovh.net/files/10Mb.dat" #big file test
     # Streaming, so we can iterate over the response.
     r = requests.get(url, stream=True)
     # Total size in bytes.
     total_size = int(r.headers.get('content-length', 0))
-    block_size = 1024 #1 Kibibyte
-    t=tqdm(total=total_size, unit='iB', unit_scale=True, desc=f'Downloading - {output_path}')
+    block_size = 1024  # 1 Kibibyte
+    t = tqdm(total=total_size, unit='iB', unit_scale=True, desc=f'Downloading - {output_path}')
     with open(output_path, 'wb') as f:
         for data in r.iter_content(block_size):
             t.update(len(data))
@@ -42,94 +43,91 @@ def downloadUrl(url, output_path):
         return False
     return True
 
+
 # clean value from restricted symbol create folder name etc.
-def cleanText(textRaw):
-    textClean = textRaw.replace('?', '');
-    textClean = textClean.replace('\'', '');
-    textClean = textClean.replace('\"', '');
-    textClean = textClean.replace(':', '');
-    textClean = textClean.replace('®', '');
-    textClean = textClean.replace('ñ', 'n');
-    textClean = textClean.replace('Ã±', 'n');
-    textClean = textClean.replace('/', '-');
+def clean_text(text_raw):
+    return text_raw.replace('?', '').replace('\'', '').replace('\"', '').replace(':', '').replace('®', '')\
+        .replace('ñ', 'n').replace('Ã±', 'n').replace('/', '-')
 
-    return textClean
 
-def getTrack(songId, albumName = None):
-
+def get_track(song_id, album_name=None):
     with requests.Session() as s:
-        login = s.get("https://api.joox.com/web-fcgi-bin/web_wmauth?country=id&lang=id&wxopenid=" + configParser.get('login', 'wxopenid') + "&password=" + configParser.get('login', 'password') + "&wmauth_type=0&authtype=2&time=1598864049294&_=1598864049295&callback=axiosJsonpCallback4")
-        urlTrack = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=" + songId
+        s.get(
+            "https://api.joox.com/web-fcgi-bin/web_wmauth?country=id&lang=id&wxopenid=" +
+            configParser.get('login', 'wxopenid') + "&password=" +
+            configParser.get('login', 'password') +
+            "&wmauth_type=0&authtype=2&time=1598864049294&_=1598864049295&callback=axiosJsonpCallback4")
+        url_track = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=" + song_id
 
-        r = s.get(urlTrack)
+        r = s.get(url_track)
 
-        dataTrackRaw = r.text
-        dataTrackRaw = dataTrackRaw[dataTrackRaw.find("(")+1:-1]
+        data_track_raw = r.text
+        data_track_raw = data_track_raw[data_track_raw.find("(") + 1:-1]
 
-        dataTrack = json.loads(dataTrackRaw)
+        data_track = json.loads(data_track_raw)
 
-        if(dataTrack['msg'] == "invaid cookie") :
+        if data_track['msg'] == "invaid cookie":
             print("Invalid cookie.")
-            sys.exit()
+            sys.exit(0)
 
-        dataTrack['msong'] = cleanText(dataTrack['msong'])
+        data_track['msong'] = clean_text(data_track['msong'])
 
-        urlAdditionalDataTrack = s.get("https://api-jooxtt.sanook.com/page/single?regionURI=id-id&country=id&lang=id&id=YEPkJhasS%2B3KfmC1kyEEag%3D%3D&device=desktop")
-        additionalDataTrack = json.loads(urlAdditionalDataTrack.text)
-        additionalDataTrack = additionalDataTrack['single']
+        url_additional_data_track = s.get(
+            "https://api-jooxtt.sanook.com/page/single?"
+            "regionURI=id-id&country=id&lang=id&id=YEPkJhasS%2B3KfmC1kyEEag%3D%3D&device=desktop")
+        additional_data_track = json.loads(url_additional_data_track.text)
+        additional_data_track = additional_data_track['single']
 
         if m4a:
-            link_track = dataTrack['m4aUrl']
-        elif (highQuality and dataTrack['has_hq']):
-            link_track = dataTrack['r320Url']
+            link_track = data_track['m4aUrl']
+        elif high_quality and data_track['has_hq']:
+            link_track = data_track['r320Url']
         else:
-            link_track = dataTrack['mp3Url']
+            link_track = data_track['mp3Url']
 
-        fileType = link_track.split('?')
-        fileType = fileType[0].split('.')
-        fileType = fileType[-1]
-
+        file_type = link_track.split('?')
+        file_type = file_type[0].split('.')
+        file_type = file_type[-1]
 
         global counter
         counter += 1
-        fileName = dataTrack['msong'] + '.' + fileType
+        file_name = data_track['msong'] + '.' + file_type
 
-        if albumName:
-            fileName = str(counter).zfill(2) + '. ' + fileName
-            folderPath = 'music/'+ albumName
-            if not os.path.exists(folderPath):
-                os.makedirs(folderPath)
-            fullPath = 'music/'+ albumName + '/' + fileName
+        if album_name:
+            file_name = str(counter).zfill(2) + '. ' + file_name
+            folder_path = 'music/' + album_name
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+            full_path = 'music/' + album_name + '/' + file_name
         else:
-            folderPath = 'music'
-            if not os.path.exists(folderPath):
-                os.makedirs(folderPath)
-            fullPath = 'music/'+ fileName
+            folder_path = 'music'
+            if not os.path.exists(folder_path):
+                os.makedirs(folder_path)
+            full_path = 'music/' + file_name
 
-        if(downloadUrl(link_track, fullPath)):
-            audiofile = music_tag.load_file(fullPath)
-            audiofile['artist'] = dataTrack['msinger']
-            audiofile['album'] = dataTrack['malbum']
-            audiofile['albumartist'] = dataTrack['msinger']
-            audiofile['tracktitle'] = dataTrack['msong']
-            audiofile['genre'] = additionalDataTrack['genre']
-            audiofile['year'] = str(additionalDataTrack['release_time'])
+        if download_url(link_track, full_path):
+            audiofile = music_tag.load_file(full_path)
+            audiofile['artist'] = data_track['msinger']
+            audiofile['album'] = data_track['malbum']
+            audiofile['albumartist'] = data_track['msinger']
+            audiofile['tracktitle'] = data_track['msong']
+            audiofile['genre'] = additional_data_track['genre']
+            audiofile['year'] = str(additional_data_track['release_time'])
             audiofile['comment'] = 'Generated By j4r1s'
-            if(additionalDataTrack['lrc_exist'] == 1):
-                audiofile['lyrics'] = additionalDataTrack['lrc_content']
+            if additional_data_track['lrc_exist'] == 1:
+                audiofile['lyrics'] = additional_data_track['lrc_content']
 
-            if (dataTrack['imgSrc'] != ""):
-                responseImg = s.get(dataTrack['imgSrc'])
-                mime_type = contentType = responseImg.headers['content-type']
-                img = responseImg.content
-                audiofile['artwork'] = img
+            if data_track['imgSrc'] != "":
+                response_img = s.get(data_track['imgSrc'])
+                audiofile['artwork'] = response_img.content
 
             audiofile.save()
 
-        return dataTrack
+        return data_track
+
 
 def main():
-    parser = argparse.ArgumentParser();
+    parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--playlist', help='Playlist ID ex. (db1J7YbWZ1LectFJqPzd5g==)')
     parser.add_argument('-a', '--album', help='Album ID ex. (fnIkeDK++hFXaAzg7s9Etg==)')
     parser.add_argument('-s', '--song', help='Song ID ex. (TtEH_iaoAGl1dh5KsV44pg==)')
@@ -137,59 +135,62 @@ def main():
     parser.add_argument('-hq', '--highquality', help='High quality', action='store_true')
     parser.add_argument('-m4a', '--m4a', help='M4A Type', action='store_true')
     args = parser.parse_args()
-    playlistEncode = vars(args)['playlist']
-    albumEncode = vars(args)['album']
-    songEncode = vars(args)['song']
-    artistEncode = vars(args)['artist']
-    global highQuality
-    highQuality = vars(args)['highquality']
+    playlist_encode = vars(args)['playlist']
+    album_encode = vars(args)['album']
+    song_encode = vars(args)['song']
+    artist_encode = vars(args)['artist']
+    global high_quality
+    high_quality = vars(args)['highquality']
     global m4a
     m4a = vars(args)['m4a']
 
-
-    if playlistEncode:
-        uri = "https://api-jooxtt.sanook.com/openjoox/v1/playlist/" + playlistEncode + "/tracks?country=id&lang=id&index=0&num=50"
-    elif albumEncode :
-        uri = "https://api-jooxtt.sanook.com/openjoox/v1/album/" + albumEncode + "/tracks?country=id&lang=id&index=0&num=50"
-    elif artistEncode :
-        uri = "https://api-jooxtt.sanook.com/page/artistDetail?id=" + artistEncode + "&lang=id&country=id"
-    elif songEncode :
+    if playlist_encode:
+        uri = "https://api-jooxtt.sanook.com/openjoox/v1/playlist/" + \
+              playlist_encode + "/tracks?country=id&lang=id&index=0&num=50"
+    elif album_encode:
+        uri = "https://api-jooxtt.sanook.com/openjoox/v1/album/" + \
+              album_encode + "/tracks?country=id&lang=id&index=0&num=50"
+    elif artist_encode:
+        uri = "https://api-jooxtt.sanook.com/page/artistDetail?id=" + \
+              artist_encode + "&lang=id&country=id"
+    elif song_encode:
         uri = "single"
     else:
         uri = None
 
-    if uri == None:
+    if uri is None:
         parser.print_help()
         parser.exit()
 
     else:
-        if songEncode:
+        if song_encode:
             # downloading track
-            song = getTrack(songEncode)
+            song = get_track(song_encode)
             print(song['msong'] + ' - Selesai!')
-        elif artistEncode:
+        elif artist_encode:
             r = requests.get(uri)
             data = r.json()
-            albumName = cleanText(data['artistInfo']['name'])
+            album_name = clean_text(data['artistInfo']['name'])
 
             for item in data['artistTracks']['tracks']['items']:
                 # downloading track
-                getTrack(item['id'], albumName)
+                get_track(item['id'], album_name)
 
                 # break
-            print(albumName + ' : ' + str(data['artistTracks']['tracks']['list_count']) + ' lagu.' + ' - Selesai!')
-        else :
+            print(album_name + ' : ' + str(data['artistTracks']['tracks']['list_count']) + ' lagu.' + ' - Selesai!')
+        else:
             # fecthing track
             r = requests.get(uri)
             data = r.json()
 
             for item in data['tracks']['items']:
                 # downloading track
-                albumName = cleanText(data['name'])
-                getTrack(item['id'], albumName)
+                album_name = clean_text(data['name'])
+                get_track(item['id'], album_name)
 
                 # break
             print(data['name'] + ' : ' + str(data['tracks']['list_count']) + ' lagu.' + ' - Selesai!')
+
 
 if __name__ == '__main__':
     try:
