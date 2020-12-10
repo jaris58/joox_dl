@@ -1,9 +1,18 @@
-﻿# Joox Downloader
+﻿<p align="center">
+    <img alt="logo" src="https://fajar-isnandio.com/wp-content/uploads/2020/12/joox_dl.png"  height="100" style="margin-bottom: 10px;">
+</p>
 
-joox_dl is Joox Downloader for Python.
+<p align="center">Joox DL is Joox Downloader for Python.</p>
+<p align="center">
+    <a href="https://fajar-isnandio.com">
+        <img src="https://fajar-isnandio.com/wp-content/uploads/2015/02/fajar-isnandio-com.png">
+    </a>
+</p>
 
-## Usage:
-### Python 3:
+---
+
+## Usage
+### Python 3
 ```install
 pip install -r requirements.txt
 ```
@@ -11,13 +20,13 @@ pip install -r requirements.txt
 usage: joox_dl.py [-h] [-p PLAYLIST] [-a ALBUM] [-s SONG] [-ar ARTIST] [-hq]
                   [-m4a]
 ```
-### Windows (CMD):
+### Windows (CMD)
 ```usage windows
 usage: joox_dl.exe [-h] [-p PLAYLIST] [-a ALBUM] [-s SONG] [-ar ARTIST] [-hq]
                    [-m4a]
 ```
 
-## Optional Arguments:
+## Optional Arguments
 ```optar
   -h, --help            show this help message and exit
   -p PLAYLIST, --playlist PLAYLIST
@@ -31,5 +40,5 @@ usage: joox_dl.exe [-h] [-p PLAYLIST] [-a ALBUM] [-s SONG] [-ar ARTIST] [-hq]
   -m4a, --m4a           M4A Type
 ```
 
-#### Contributor:
-[![alt fajar-isnandio.com](https://fajar-isnandio.com/wp-content/uploads/2015/02/fajar-isnandio-com.png)](https://fajar-isnandio.com)
+## License
+[MIT](https://en.wikipedia.org/wiki/MIT_License)
