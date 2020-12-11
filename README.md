@@ -9,7 +9,7 @@
     <a href="https://github.com/jaris58/joox_dl/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/jaris58/joox_dl"></a>
     <br>
     <a href="https://fajar-isnandio.com">
-        <img src="https://fajar-isnandio.com/wp-content/uploads/2015/02/fajar-isnandio-com.png">
+        <img src="https://fajar-isnandio.com/wp-content/uploads/2015/02/fajar-isnandio-com.png" alt="Fajar Isnandio">
     </a>
 </p>
 
