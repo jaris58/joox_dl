@@ -47,7 +47,7 @@ def download_url(url, output_path):
 # clean value from restricted symbol create folder name etc.
 def clean_text(text_raw):
     return text_raw.replace('?', '').replace('\'', '').replace('\"', '').replace(':', '').replace('®', '')\
-        .replace('ñ', 'n').replace('Ã±', 'n').replace('/', '-')
+        .replace('ñ', 'n').replace('Ã±', 'n').replace('/', '-').replace('|', '-')
 
 
 def get_track(song_id, album_name=None):
