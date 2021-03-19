@@ -14,5 +14,5 @@ pyinstaller-hooks-contrib==2020.10
 pywin32-ctypes==0.2.0
 requests==2.25.0
 tqdm==4.54.1
-urllib3==1.26.2
+urllib3==1.26.3
 yarg==0.1.9
