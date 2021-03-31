@@ -21,27 +21,28 @@
 pip install -r requirements.txt
 ```
 ```usage python
-usage: joox_dl.py [-h] [-p PLAYLIST] [-a ALBUM] [-s SONG] [-ar ARTIST] [-hq]
-                  [-m4a]
+usage: joox_dl.py [-h] [-u URL] [-m] [-hq]
 ```
 ### Windows (CMD)
 ```usage windows
-usage: joox_dl.exe [-h] [-p PLAYLIST] [-a ALBUM] [-s SONG] [-ar ARTIST] [-hq]
-                   [-m4a]
+usage: joox_dl.exe [-h] [-u URL] [-m] [-hq]
+```
+### Example
+```example
+python joox_dl.py -m -u https://www.joox.com/id/playlist/db1J7YbWZ1LectFJqPzd5g==
+python joox_dl.py -m -u https://www.joox.com/id/album/fnIkeDK++hFXaAzg7s9Etg==
+python joox_dl.py -m -u https://www.joox.com/id/single/TtEH_iaoAGl1dh5KsV44pg==
+python joox_dl.py -m -u https://www.joox.com/id/artist/oPx7SaQaTLhpqJP1zpTSpQ==
+python joox_dl.py -m -u https://www.joox.com/id/chart/36
 ```
 
 ## Optional Arguments
 ```optar
-  -h, --help            show this help message and exit
-  -p PLAYLIST, --playlist PLAYLIST
-                        Playlist ID ex. (db1J7YbWZ1LectFJqPzd5g==)
-  -a ALBUM, --album ALBUM
-                        Album ID ex. (fnIkeDK++hFXaAzg7s9Etg==)
-  -s SONG, --song SONG  Song ID ex. (TtEH_iaoAGl1dh5KsV44pg==)
-  -ar ARTIST, --artist ARTIST
-                        Artist ID ex. (oPx7SaQaTLhpqJP1zpTSpQ==)
-  -hq, --highquality    High quality
-  -m4a, --m4a           M4A Type
+  -h, --help          show this help message and exit
+  -u URL, --url URL   url String
+  -m, --m4a           m4a Type
+  -hq, --highquality  high quality
+
 ```
 
 ## License
