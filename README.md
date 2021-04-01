@@ -15,11 +15,15 @@
 
 ----
 
-## Usage
+## Installation
 ### Python 3
 ```install
 pip install -r requirements.txt
 ```
+### Windows (CMD)
+> Download last application in [here](https://github.com/jaris58/joox_dl/releases/latest)
+## Usage
+### Python 3
 ```usage python
 usage: joox_dl.py [-h] [-u URL] [-m] [-hq]
 ```
@@ -58,5 +62,6 @@ python joox_dl.py -m -u https://www.joox.com/id/chart/36
 > - fixing error mutagen.MutagenError: [Errno 13] Permission denied
 > - fixing error KeyError: 'genre'
 
+[Full Change Log](https://github.com/jaris58/joox_dl/blob/master/CHANGELOG.md)
 ## License
 [MIT](https://en.wikipedia.org/wiki/MIT_License)
