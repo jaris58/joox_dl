@@ -12,13 +12,7 @@ import music_tag
 import requests
 from tqdm import tqdm
 
-# pyinstaller --onefile --icon=logo.ico .\joox_dl.py
-m4a = None
-hq = None
-url_str = None
-counter = 0
-music_folder = 'music/'
-
+# pyinstaller --onefile --icon=logo.ico --add-data="data_files/template.wpl;data_files" .\joox_dl.py
 configName = 'joox_dl.cfg'
 
 if getattr(sys, 'freeze', False):
@@ -30,6 +24,25 @@ configPath = os.path.join(applicationPath, configName)
 configParser = configparser.RawConfigParser()
 configParser.read(configPath)
 
+m4a = None
+hq = None
+url_str = None
+counter = 0
+music_folder = configParser.get('app', 'music_folder')
+wxopenid = configParser.get('login', 'wxopenid')
+password = configParser.get('login', 'password')
+
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 
 # download funtion
 def download_url(url, output_path):
@@ -39,7 +52,7 @@ def download_url(url, output_path):
     # Total size in bytes.
     total_size = int(r.headers.get('content-length', 0))
     block_size = 1024  # 1 Kibibyte
-    t = tqdm(total=total_size, unit='iB', unit_scale=True, desc=f'Downloading - {output_path}')
+    t = tqdm(total=total_size, unit='iB', unit_scale=True, desc=f'Downloading - {get_last_segment(output_path)}')
     with open(output_path, 'wb') as f:
         for data in r.iter_content(block_size):
             t.update(len(data))
@@ -62,8 +75,8 @@ def get_track(url):
         epoch = int(time.time()) - 60
         s.get(
             "https://api.joox.com/web-fcgi-bin/web_wmauth?country=id&lang=id&wxopenid=" +
-            configParser.get('login', 'wxopenid') + "&password=" +
-            configParser.get('login', 'password') + "&wmauth_type=0&authtype=2" +
+            wxopenid + "&password=" +
+            password + "&wmauth_type=0&authtype=2" +
             "&time=" + str(epoch) + "294&_=" + str(epoch) + "295&callback=axiosJsonpCallback1")
         url_track = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=" + song_id
 
@@ -180,10 +193,12 @@ def set_tag(session, data_track, additional_data_track=None):
         audiofile['tracknumber'] = data_track['tracknumber']
 
     if additional_data_track:
-        audiofile['genre'] = additional_data_track['genre']
-        audiofile['year'] = str(additional_data_track['release_time'])
+        audiofile['genre'] = additional_data_track['genre'] if 'genre' in additional_data_track else None
+        audiofile['year'] = str(additional_data_track['release_time']) \
+            if 'release_time' in additional_data_track else None
         if additional_data_track['lrc_exist'] == 1:
-            audiofile['lyrics'] = str(base64.b64decode(additional_data_track['lrc_content']))
+            audiofile['lyrics'] = str(base64.b64decode(additional_data_track['lrc_content'])) \
+                if 'lrc_content' in additional_data_track else None
         else:
             audiofile['lyrics'] = None
     else:
@@ -194,7 +209,10 @@ def set_tag(session, data_track, additional_data_track=None):
     if data_track['imgSrc'] != "":
         response_img = session.get(data_track['imgSrc'])
         audiofile['artwork'] = response_img.content
-    audiofile.save()
+    try:
+        audiofile.save()
+    except Exception:
+        print("Skipped " + get_info(data_track) + " in use.")
 
 
 def get_last_segment(url):
@@ -262,7 +280,8 @@ def generate_wpl(title, pathlist):
         'title': html.escape(title),
         'medialist': '\n'.join(medialist)
     }
-    with open('template.wpl', 'r') as f:
+    file_path = resource_path('data_files/template.wpl')
+    with open(file_path, 'r') as f:
         src = Template(f.read())
         result = src.substitute(data_playlist)
 

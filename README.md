@@ -45,5 +45,18 @@ python joox_dl.py -m -u https://www.joox.com/id/chart/36
 
 ```
 
+## Change log
+> ## [2.1.0] - 2021-04-01
+>  
+> ### Added
+> 
+> - added app.music_folder config
+>  
+> ### Fixed 
+> 
+> - fixing error generate wpl
+> - fixing error mutagen.MutagenError: [Errno 13] Permission denied
+> - fixing error KeyError: 'genre'
+
 ## License
 [MIT](https://en.wikipedia.org/wiki/MIT_License)

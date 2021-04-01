@@ -1,0 +1,14 @@
+<?wpl version="1.0"?>
+<smil>
+    <head>
+        <meta name="Generator" content="Microsoft Windows Media Player -- 12.0.19041.546"/>
+        <meta name="ItemCount" content="0"/>
+        <author/>
+        <title>$title</title>
+    </head>
+    <body>
+        <seq>
+            $medialist
+        </seq>
+    </body>
+</smil>
