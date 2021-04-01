@@ -22,6 +22,16 @@ pip install -r requirements.txt
 ```
 ### Windows (CMD)
 > Download last application in [here](https://github.com/jaris58/joox_dl/releases/latest)
+### File Config
+> joox_dl.cfg
+> ```config
+> [app]
+> music_folder=music/
+>
+> [login]
+> wxopenid=[your-id]
+> password=[your-password]
+> ```
 ## Usage
 ### Python 3
 ```usage python
