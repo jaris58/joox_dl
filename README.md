@@ -62,13 +62,17 @@ python joox_dl.py -m -u https://www.joox.com/id/chart/36
 ## Change log
 > ## [2.1.1] - 2021-04-05
 >  
-> ### Changed
+> ### Added
 > 
-> - changed login.wxopenid to login.email in config
+> - add login.email in config
 >  
 > ### Fixed 
 > 
-> - fixed [#3](https://github.com/jaris58/joox_dl/issues/3#issue-849974043) error Invalid cookie
+> - fix [#3](https://github.com/jaris58/joox_dl/issues/3#issue-849974043) : Invalid cookie
+> 
+> ### Removed
+> 
+> -  remove login.wxopenid in config
 
 [Full Change Log](https://github.com/jaris58/joox_dl/blob/master/CHANGELOG.md)
 ## License
