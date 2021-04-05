@@ -1,12 +1,14 @@
 import argparse
 import base64
 import configparser
+import hashlib
 import html
 import json
 import os
 import sys
 import time
 from string import Template
+from urllib.parse import quote
 
 import music_tag
 import requests
@@ -29,8 +31,9 @@ hq = None
 url_str = None
 counter = 0
 music_folder = configParser.get('app', 'music_folder')
-wxopenid = configParser.get('login', 'wxopenid')
-password = configParser.get('login', 'password')
+
+wxopenid = quote(quote(configParser.get('login', 'email')))
+password = hashlib.md5(configParser.get('login', 'password').encode('utf-8')).hexdigest()
 
 
 def resource_path(relative_path):
