@@ -29,7 +29,7 @@ pip install -r requirements.txt
 > music_folder=music/
 >
 > [login]
-> wxopenid=[your-id]
+> email=[your-email]
 > password=[your-password]
 > ```
 ## Usage
@@ -60,17 +60,15 @@ python joox_dl.py -m -u https://www.joox.com/id/chart/36
 ```
 
 ## Change log
-> ## [2.1.0] - 2021-04-01
+> ## [2.1.1] - 2021-04-05
 >  
-> ### Added
+> ### Changed
 > 
-> - added app.music_folder config
+> - changed login.wxopenid to login.email in config
 >  
 > ### Fixed 
 > 
-> - fixing error generate wpl
-> - fixing error mutagen.MutagenError: [Errno 13] Permission denied
-> - fixing error KeyError: 'genre'
+> - fixed [#3](https://github.com/jaris58/joox_dl/issues/3#issue-849974043) error Invalid cookie
 
 [Full Change Log](https://github.com/jaris58/joox_dl/blob/master/CHANGELOG.md)
 ## License
