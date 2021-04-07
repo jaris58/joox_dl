@@ -470,8 +470,7 @@ def main():
                       ' lagu.' + ' - Selesai!')
 
 
-# pyinstaller --onefile --icon=logo.ico
-# --add-data="data_files/template.wpl;data_files" --add-data="data_files/joox_dl.cfg;data_files" .\joox_dl.py
+# pyinstaller --onefile --icon=logo.ico --add-data="data_files;data_files" .\joox_dl.py
 # pip freeze > requirements.txt
 if getattr(sys, 'freeze', False):
     applicationPath = os.path.dirname(sys.executable)
