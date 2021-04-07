@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.0] - 2021-04-07
+ 
+### Added
+
+- add force option to force re-download file
+- add folder path while loading / download file
+ 
+### Fixed 
+
+- fix song with same name but diferent file
+- fix re-download file if broken / un-complete file
+- fix artist name if more than one
+- fix generate config file if not exist
+- fix configparser.NoOptionError
+
 ## [2.1.1] - 2021-04-05
  
 ### Added
