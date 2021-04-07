@@ -496,7 +496,6 @@ force = None
 url_str = None
 counter = 0
 music_folder = configParser.get('app', 'music_folder')
-
 authtype = None
 email = None
 password = None

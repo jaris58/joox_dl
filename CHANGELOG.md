@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - add force option to force re-download file
 - add folder path while loading / download file
+- login support with facebook
  
 ### Fixed 
 

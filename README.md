@@ -27,10 +27,13 @@ pip install -r requirements.txt
 > ```config
 > [app]
 > music_folder=music/
->
+> 
 > [login]
+> authtype=2
 > email=[your-email]
 > password=[your-password]
+> wxopenid=[your-wxopenid]
+> access_token=[your-access_token]
 > ```
 ## Usage
 ### Python 3
@@ -73,6 +76,8 @@ python joox_dl.py -m -u https://www.joox.com/id/chart/36
 > - fix song with same name but diferent file
 > - fix re-download file if broken / un-complete file
 > - fix artist name if more than one
+> - fix generate config file if not exist
+> - fix configparser.NoOptionError
 
 [Full Change Log](https://github.com/jaris58/joox_dl/blob/master/CHANGELOG.md)
 ## License
