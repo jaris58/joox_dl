@@ -27,19 +27,22 @@ pip install -r requirements.txt
 > ```config
 > [app]
 > music_folder=music/
->
+> 
 > [login]
+> authtype=2
 > email=[your-email]
 > password=[your-password]
+> wxopenid=[your-wxopenid]
+> access_token=[your-access_token]
 > ```
 ## Usage
 ### Python 3
 ```usage python
-usage: joox_dl.py [-h] [-u URL] [-m] [-hq]
+usage: joox_dl.py [-h] [-u URL] [-m] [-hq] [-f]
 ```
 ### Windows (CMD)
 ```usage windows
-usage: joox_dl.exe [-h] [-u URL] [-m] [-hq]
+usage: joox_dl.exe [-h] [-u URL] [-m] [-hq] [-f]
 ```
 ### Example
 ```example
@@ -53,26 +56,28 @@ python joox_dl.py -m -u https://www.joox.com/id/chart/36
 ## Optional Arguments
 ```optar
   -h, --help          show this help message and exit
-  -u URL, --url URL   url String
-  -m, --m4a           m4a Type
-  -hq, --highquality  high quality
+  -u URL, --url URL   Url String
+  -m, --m4a           M4A file type
+  -hq, --highquality  High quality
+  -f, --force         Force to re-download
 
 ```
 
 ## Change log
-> ## [2.1.1] - 2021-04-05
+> ## [2.2.0] - 2021-04-07
 >  
 > ### Added
 > 
-> - add login.email in config
+> - add force option to force re-download file
+> - add folder path while loading / download file
 >  
 > ### Fixed 
 > 
-> - fix [#3](https://github.com/jaris58/joox_dl/issues/3#issue-849974043) : Invalid cookie
-> 
-> ### Removed
-> 
-> -  remove login.wxopenid in config
+> - fix song with same name but diferent file
+> - fix re-download file if broken / un-complete file
+> - fix artist name if more than one
+> - fix generate config file if not exist
+> - fix configparser.NoOptionError
 
 [Full Change Log](https://github.com/jaris58/joox_dl/blob/master/CHANGELOG.md)
 ## License

@@ -1,6 +1,7 @@
 import argparse
 import base64
 import configparser
+import filecmp
 import hashlib
 import html
 import json
@@ -13,27 +14,6 @@ from urllib.parse import quote
 import music_tag
 import requests
 from tqdm import tqdm
-
-# pyinstaller --onefile --icon=logo.ico --add-data="data_files/template.wpl;data_files" .\joox_dl.py
-configName = 'joox_dl.cfg'
-
-if getattr(sys, 'freeze', False):
-    applicationPath = os.path.dirname(sys.executable)
-else:
-    applicationPath = os.path.dirname(__file__)
-
-configPath = os.path.join(applicationPath, configName)
-configParser = configparser.RawConfigParser()
-configParser.read(configPath)
-
-m4a = None
-hq = None
-url_str = None
-counter = 0
-music_folder = configParser.get('app', 'music_folder')
-
-wxopenid = quote(quote(configParser.get('login', 'email')))
-password = hashlib.md5(configParser.get('login', 'password').encode('utf-8')).hexdigest()
 
 
 def resource_path(relative_path):
@@ -48,14 +28,14 @@ def resource_path(relative_path):
 
 
 # download funtion
-def download_url(url, output_path):
+def download_url(url, output_path, filename="File"):
     # url = "http://www.ovh.net/files/10Mb.dat" #big file test
     # Streaming, so we can iterate over the response.
     r = requests.get(url, stream=True)
     # Total size in bytes.
     total_size = int(r.headers.get('content-length', 0))
     block_size = 1024  # 1 Kibibyte
-    t = tqdm(total=total_size, unit='iB', unit_scale=True, desc=f'Downloading - {get_last_segment(output_path)}')
+    t = tqdm(total=total_size, unit='iB', unit_scale=True, desc=f'Downloading - {filename}')
     with open(output_path, 'wb') as f:
         for data in r.iter_content(block_size):
             t.update(len(data))
@@ -74,13 +54,18 @@ def clean_text(text_raw):
 
 def get_track(url):
     song_id = url.split("/")[-1]
+    epoch = int(time.time()) - 60
+    url_auth = "https://api.joox.com/web-fcgi-bin/web_wmauth?"
+    if authtype == "1":
+        url_auth += "authtype=1&wxopenid=" + wxopenid + "&access_token=" + access_token
+        url_auth += "&_=" + str(epoch) + "295&callback=axiosJsonpCallback1"
+    else:
+        url_auth += "country=id&lang=id&wxopenid=" + email + "&password=" + password + "&wmauth_type=0&authtype=2"
+        url_auth += "&time=" + str(epoch) + "294&_=" + str(epoch) + "295&callback=axiosJsonpCallback1"
+
     with requests.Session() as s:
-        epoch = int(time.time()) - 60
-        s.get(
-            "https://api.joox.com/web-fcgi-bin/web_wmauth?country=id&lang=id&wxopenid=" +
-            wxopenid + "&password=" +
-            password + "&wmauth_type=0&authtype=2" +
-            "&time=" + str(epoch) + "294&_=" + str(epoch) + "295&callback=axiosJsonpCallback1")
+        s.get(url_auth)
+
         url_track = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=" + song_id
 
         r = s.get(url_track)
@@ -118,15 +103,19 @@ def get_track(url):
             file_type = file_type[0].split('.')
             file_type = file_type[-1]
 
-            file_name = data_track['msong'] + '.' + file_type
-            data_track['fpath'] = get_full_path_music(data_track, file_name)
+            generate_name(song_id, data_track, file_type)
 
             if not os.path.exists(data_track['fpath']):
-                if download_url(link_track, data_track['fpath']):
-                    set_tag(s, data_track, additional_data_track)
+                download_track(s, data_track, link_track, additional_data_track)
             else:
-                print(get_info(data_track) + ' - sudah ada.')
-                set_tag(s, data_track, additional_data_track)
+                if get_size_link_track(data_track) > os.path.getsize(data_track['fpath']):
+                    download_track(s, data_track, link_track, additional_data_track)
+                else:
+                    if force:
+                        download_track(s, data_track, link_track, additional_data_track)
+                    else:
+                        print(get_info(data_track) + ' - sudah ada.')
+                        set_tag(s, data_track, additional_data_track)
 
             data_track['apath'] = os.path.abspath(data_track['fpath'])
             data_track['spath'] = '../' + data_track['fpath'][len(music_folder):]
@@ -136,8 +125,7 @@ def get_track(url):
             file_type = 'm4a'
         else:
             file_type = 'mp3'
-        file_name = data_track['msong'] + '.' + file_type
-        data_track['fpath'] = get_full_path_music(data_track, file_name)
+        generate_name(song_id, data_track, file_type)
 
         if os.path.exists(data_track['fpath']):
             print(get_info(data_track) + ' - sudah ada.')
@@ -149,8 +137,37 @@ def get_track(url):
         return None
 
 
+def download_track(session, data_track, link_track, additional_data_track):
+    global folder_destination
+    filename = get_last_segment(data_track['fpath'])
+    folder = data_track['fpath'][:-len(filename)]
+    if folder_destination != folder:
+        print("Folder : " + folder[len(music_folder):])
+        folder_destination = folder
+
+    if download_url(link_track, data_track['fpath'], filename):
+        set_tag(session, data_track, additional_data_track)
+
+
+def generate_name(song_id, data_track, file_type, count_try=0):
+    suffix = ""
+    if count_try > 0:
+        suffix = "-" + str(count_try).zfill(2)
+
+    file_name = data_track['msong'] + suffix + '.' + file_type
+    data_track['fpath'] = get_full_path_music(data_track, file_name)
+
+    if os.path.exists(data_track['fpath']):
+        if not check_file_tag(data_track, song_id):
+            count_try += 1
+            if count_try > 99:
+                print("Count try max.")
+                exit(0)
+            generate_name(song_id, data_track, file_type, count_try)
+
+
 def get_info(data_track):
-    return data_track['msinger'] + '/' + data_track['malbum'] + '/' + data_track['msong']
+    return data_track['fpath'][len(music_folder):]
 
 
 def get_full_path_music(data_track, file_name):
@@ -168,6 +185,21 @@ def get_full_path_music(data_track, file_name):
     return album_folder + file_name
 
 
+def get_size_link_track(data_track):
+    kbps_map = json.loads(data_track['kbps_map'])
+
+    if m4a and hq and kbps_map['192'] > 0:
+        return kbps_map['192']
+    elif m4a and kbps_map['96'] > 0:
+        return kbps_map['96']
+    elif hq and kbps_map['320'] > 0:
+        return kbps_map['320']
+    elif kbps_map['128'] > 0:
+        return kbps_map['128']
+    else:
+        return None
+
+
 def get_link_track(data_track):
     kbps_map = json.loads(data_track['kbps_map'])
 
@@ -183,19 +215,34 @@ def get_link_track(data_track):
         return None
 
 
-def set_tag(session, data_track, additional_data_track=None):
+def check_file_tag(data_track, song_id):
+    global audiofile
     audiofile = music_tag.load_file(data_track['fpath'])
-    audiofile['artist'] = data_track['msinger']
+    comment_tag = str(audiofile['comment']).split('\n')
+    if len(comment_tag) > 2:
+        song_id_file = get_last_segment(comment_tag[1])
+        if song_id_file == song_id:
+            return True
+        return False
+    return True
+
+
+def set_tag(session, data_track, additional_data_track=None):
+    global audiofile
+    if not audiofile:
+        audiofile = music_tag.load_file(data_track['fpath'])
+
     audiofile['album'] = data_track['malbum']
     audiofile['albumartist'] = data_track['msinger']
     audiofile['tracktitle'] = data_track['msong']
-    audiofile['comment'] = 'Generated By j4r1s \n' + \
+    audiofile['comment'] = 'Generated By jaris58 \n' + \
                            get_single_link(data_track['encodeSongId']) + '\n' + \
                            str(url_str)
     if get_mode(str(url_str)) == 'album':
         audiofile['tracknumber'] = data_track['tracknumber']
 
     if additional_data_track:
+        audiofile['artist'] = ", ".join([i['name'] for i in additional_data_track['artist_list']])
         audiofile['genre'] = additional_data_track['genre'] if 'genre' in additional_data_track else None
         audiofile['year'] = str(additional_data_track['release_time']) \
             if 'release_time' in additional_data_track else None
@@ -205,6 +252,7 @@ def set_tag(session, data_track, additional_data_track=None):
         else:
             audiofile['lyrics'] = None
     else:
+        audiofile['artist'] = data_track['msinger']
         audiofile['genre'] = None
         audiofile['year'] = None
         audiofile['lyrics'] = None
@@ -214,7 +262,9 @@ def set_tag(session, data_track, additional_data_track=None):
         audiofile['artwork'] = response_img.content
     try:
         audiofile.save()
+        audiofile = None
     except Exception:
+        audiofile = None
         print("Skipped " + get_info(data_track) + " in use.")
 
 
@@ -273,6 +323,22 @@ def get_single_link(encodestr):
     return 'https://www.joox.com/id/single/' + encodestr.replace('/', '_')
 
 
+def generate_config():
+    file_path = resource_path('data_files/joox_dl.cfg')
+    with open(file_path, 'r') as f:
+        result = f.read()
+        f_config = open(configName, "w", encoding="utf-8")
+        f_config.write(result)
+        f_config.close()
+
+
+def check_config():
+    config_template = resource_path('data_files/joox_dl.cfg')
+    config_file = configPath
+
+    return filecmp.cmp(config_template, config_file)
+
+
 def generate_wpl(title, pathlist):
     medialist = []
     for path in pathlist:
@@ -300,9 +366,10 @@ def generate_wpl(title, pathlist):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-u', '--url', help='url String')
-    parser.add_argument('-m', '--m4a', help='m4a Type', action='store_true')
-    parser.add_argument('-hq', '--highquality', help='high quality', action='store_true')
+    parser.add_argument('-u', '--url', help='Url String')
+    parser.add_argument('-m', '--m4a', help='M4A file type', action='store_true')
+    parser.add_argument('-hq', '--highquality', help='High quality', action='store_true')
+    parser.add_argument('-f', '--force', help='Force to re-download', action='store_true')
 
     args = parser.parse_args()
     global url_str
@@ -311,7 +378,8 @@ def main():
     hq = vars(args)['highquality']
     global m4a
     m4a = vars(args)['m4a']
-    global music_folder
+    global force
+    force = vars(args)['force']
 
     if url_str is None:
         parser.print_help()
@@ -401,6 +469,49 @@ def main():
                 print(get_mode_text(url_str) + ' - ' + str(name) + ' : ' + str(counter) + "/" + str(total_song) +
                       ' lagu.' + ' - Selesai!')
 
+
+# pyinstaller --onefile --icon=logo.ico --add-data="data_files;data_files" .\joox_dl.py
+# pip freeze > requirements.txt
+if getattr(sys, 'freeze', False):
+    applicationPath = os.path.dirname(sys.executable)
+else:
+    applicationPath = os.path.dirname(__file__)
+
+configName = 'joox_dl.cfg'
+configPath = os.path.join(applicationPath, configName)
+if not os.path.exists(configPath):
+    generate_config()
+
+if check_config():
+    print(configName + " belum di-konfigurasi.")
+    sys.exit(0)
+configParser = configparser.RawConfigParser()
+configParser.read(configPath)
+
+folder_destination = None
+audiofile = None
+m4a = None
+hq = None
+force = None
+url_str = None
+counter = 0
+music_folder = configParser.get('app', 'music_folder')
+authtype = None
+email = None
+password = None
+wxopenid = None
+access_token = None
+
+if configParser.has_option('login', 'authtype'):
+    authtype = configParser.get('login', 'authtype')
+if configParser.has_option('login', 'email'):
+    email = quote(quote(configParser.get('login', 'email')))
+if configParser.has_option('login', 'password'):
+    password = hashlib.md5(configParser.get('login', 'password').encode('utf-8')).hexdigest()
+if configParser.has_option('login', 'wxopenid'):
+    wxopenid = configParser.get('login', 'wxopenid')
+if configParser.has_option('login', 'access_token'):
+    access_token = configParser.get('login', 'access_token')
 
 if __name__ == '__main__':
     try:
