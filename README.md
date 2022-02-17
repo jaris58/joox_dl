@@ -64,20 +64,11 @@ python joox_dl.py -m -u https://www.joox.com/id/chart/36
 ```
 
 ## Change log
-> ## [2.2.0] - 2021-04-07
+> ## [2.2.1] - 2022-02-17
 >  
-> ### Added
+> ### Security
 > 
-> - add force option to force re-download file
-> - add folder path while loading / download file
->  
-> ### Fixed 
-> 
-> - fix song with same name but diferent file
-> - fix re-download file if broken / un-complete file
-> - fix artist name if more than one
-> - fix generate config file if not exist
-> - fix configparser.NoOptionError
+> - Bumps [pillow](https://github.com/python-pillow/Pillow) from 8.3.2 to 9.0.1.
 
 [Full Change Log](https://github.com/jaris58/joox_dl/blob/master/CHANGELOG.md)
 ## License
