@@ -54,87 +54,76 @@ def clean_text(text_raw):
 
 def get_track(url):
     song_id = url.split("/")[-1]
-    epoch = int(time.time()) - 60
-    url_auth = "https://api.joox.com/web-fcgi-bin/web_wmauth?"
-    if authtype == "1":
-        url_auth += "authtype=1&wxopenid=" + wxopenid + "&access_token=" + access_token
-        url_auth += "&_=" + str(epoch) + "295&callback=axiosJsonpCallback1"
+
+    url_track = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=" + song_id
+
+    r = s.get(url_track)
+
+    data_track_raw = r.text
+    data_track_raw = data_track_raw[data_track_raw.find("(") + 1:-1]
+
+    data_track = json.loads(data_track_raw)
+
+    if data_track['msg'] == "invaid cookie":
+        print("Invalid cookie.")
+        sys.exit(0)
+
+    data_track['msinger'] = clean_text(data_track['msinger'])
+    data_track['malbum'] = clean_text(data_track['malbum'])
+    data_track['msong'] = clean_text(data_track['msong'])
+
+    url_additional_data_track = "https://api-jooxtt.sanook.com/page/single?" + \
+                                "regionURI=id-id&country=id&lang=id&id=" + \
+                                str(song_id) + "&device=desktop"
+    r = s.get(url_additional_data_track)
+    additional_data_track_raw = json.loads(r.text)
+    if 'single' in additional_data_track_raw and additional_data_track_raw['single']['status_code'] == 0:
+        additional_data_track = additional_data_track_raw['single']
     else:
-        url_auth += "country=id&lang=id&wxopenid=" + email + "&password=" + password + "&wmauth_type=0&authtype=2"
-        url_auth += "&time=" + str(epoch) + "294&_=" + str(epoch) + "295&callback=axiosJsonpCallback1"
+        additional_data_track = None
 
-    with requests.Session() as s:
-        s.get(url_auth)
+    global counter
+    counter += 1
+    data_track['tracknumber'] = counter
 
-        url_track = "http://api.joox.com/web-fcgi-bin/web_get_songinfo?songid=" + song_id
+    link_track = get_link_track(data_track)
+    if link_track:
+        file_type = link_track.split('?')
+        file_type = file_type[0].split('.')
+        file_type = file_type[-1]
 
-        r = s.get(url_track)
-
-        data_track_raw = r.text
-        data_track_raw = data_track_raw[data_track_raw.find("(") + 1:-1]
-
-        data_track = json.loads(data_track_raw)
-
-        if data_track['msg'] == "invaid cookie":
-            print("Invalid cookie.")
-            sys.exit(0)
-
-        data_track['msinger'] = clean_text(data_track['msinger'])
-        data_track['malbum'] = clean_text(data_track['malbum'])
-        data_track['msong'] = clean_text(data_track['msong'])
-
-        url_additional_data_track = "https://api-jooxtt.sanook.com/page/single?" + \
-                                    "regionURI=id-id&country=id&lang=id&id=" + \
-                                    str(song_id) + "&device=desktop"
-        r = s.get(url_additional_data_track)
-        additional_data_track_raw = json.loads(r.text)
-        if 'single' in additional_data_track_raw and additional_data_track_raw['single']['status_code'] == 0:
-            additional_data_track = additional_data_track_raw['single']
-        else:
-            additional_data_track = None
-
-        global counter
-        counter += 1
-        data_track['tracknumber'] = counter
-
-        link_track = get_link_track(data_track)
-        if link_track:
-            file_type = link_track.split('?')
-            file_type = file_type[0].split('.')
-            file_type = file_type[-1]
-
-            generate_name(song_id, data_track, file_type)
-
-            if not os.path.exists(data_track['fpath']):
-                download_track(s, data_track, link_track, additional_data_track)
-            else:
-                if get_size_link_track(data_track) > os.path.getsize(data_track['fpath']):
-                    download_track(s, data_track, link_track, additional_data_track)
-                else:
-                    if force:
-                        download_track(s, data_track, link_track, additional_data_track)
-                    else:
-                        print(get_info(data_track) + ' - sudah ada.')
-                        set_tag(s, data_track, additional_data_track)
-
-            data_track['apath'] = os.path.abspath(data_track['fpath'])
-            data_track['spath'] = '../' + data_track['fpath'][len(music_folder):]
-
-            return data_track
-        if m4a:
-            file_type = 'm4a'
-        else:
-            file_type = 'mp3'
         generate_name(song_id, data_track, file_type)
 
-        if os.path.exists(data_track['fpath']):
-            print(get_info(data_track) + ' - sudah ada.')
-            data_track['apath'] = os.path.abspath(data_track['fpath'])
-            data_track['spath'] = '../' + data_track['fpath'][len(music_folder):]
-            return data_track
+        if not os.path.exists(data_track['fpath']):
+            download_track(s, data_track, link_track, additional_data_track)
+        else:
+            if get_size_link_track(data_track) > os.path.getsize(data_track['fpath']):
+                download_track(s, data_track, link_track, additional_data_track)
+            else:
+                if force:
+                    download_track(s, data_track, link_track, additional_data_track)
+                else:
+                    print(get_info(data_track) + ' - sudah ada.')
+                    set_tag(s, data_track, additional_data_track)
 
-        print(get_info(data_track) + ' - link rusak.')
-        return None
+        data_track['apath'] = os.path.abspath(data_track['fpath'])
+        data_track['spath'] = '../' + data_track['fpath'][len(music_folder):]
+
+        return data_track
+    if m4a:
+        file_type = 'm4a'
+    else:
+        file_type = 'mp3'
+    generate_name(song_id, data_track, file_type)
+
+    if os.path.exists(data_track['fpath']):
+        print(get_info(data_track) + ' - sudah ada.')
+        data_track['apath'] = os.path.abspath(data_track['fpath'])
+        data_track['spath'] = '../' + data_track['fpath'][len(music_folder):]
+        return data_track
+
+    print(get_info(data_track) + ' - link rusak.')
+    return None
 
 
 def download_track(session, data_track, link_track, additional_data_track):
@@ -257,7 +246,7 @@ def set_tag(session, data_track, additional_data_track=None):
         audiofile['year'] = None
         audiofile['lyrics'] = None
 
-    if data_track['imgSrc'] != "":
+    if data_track['imgSrc'] != "" and 'http' in data_track['imgSrc']:
         response_img = session.get(data_track['imgSrc'])
         audiofile['artwork'] = response_img.content
     try:
@@ -371,14 +360,12 @@ def main():
     parser.add_argument('-hq', '--highquality', help='High quality', action='store_true')
     parser.add_argument('-f', '--force', help='Force to re-download', action='store_true')
 
+    global url_str, hq, m4a, force, s
+
     args = parser.parse_args()
-    global url_str
     url_str = vars(args)['url']
-    global hq
     hq = vars(args)['highquality']
-    global m4a
     m4a = vars(args)['m4a']
-    global force
     force = vars(args)['force']
 
     if url_str is None:
@@ -390,6 +377,17 @@ def main():
         print("Url tidak dikenal.")
 
     else:
+        epoch = int(time.time()) - 60
+        url_auth = "https://api.joox.com/web-fcgi-bin/web_wmauth?"
+        if authtype == "1":
+            url_auth += "authtype=1&wxopenid=" + wxopenid + "&access_token=" + access_token
+            url_auth += "&_=" + str(epoch) + "295&callback=axiosJsonpCallback1"
+        else:
+            url_auth += "country=id&lang=id&wxopenid=" + email + "&password=" + password + "&wmauth_type=0&authtype=2"
+            url_auth += "&time=" + str(epoch) + "294&_=" + str(epoch) + "295&callback=axiosJsonpCallback1"
+        s = requests.Session()
+        s.get(url_auth)
+
         if mode == "single":
             # downloading track
             get_track(url_str)
