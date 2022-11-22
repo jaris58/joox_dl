@@ -7,7 +7,7 @@ idna==3.3
 music-tag==0.4.3
 mutagen==1.45.1
 pefile==2021.9.3
-Pillow==9.0.1
+Pillow==9.3.0
 pipreqs==0.4.11
 pyinstaller==4.9
 pyinstaller-hooks-contrib==2022.2
